@@ -31,9 +31,12 @@ mosi = microcontroller.pin.GPIO19
 miso = microcontroller.pin.GPIO16
 reset = microcontroller.pin.GPIO10
 
+rst = digitalio.DigitalInOut(reset)
+rst.direction = digitalio.Direction.OUTPUT
+
 spi = busio.SPI(sck, mosi, miso)
 avrprog = adafruit_avrprog.AVRprog()
-avrprog.init(spi, reset)
+#avrprog.init(spi, reset)
 # Each chip has to have a definition so the script knows how to find it
 attiny85 = avrprog.Boards.ATtiny85
 
@@ -67,6 +70,7 @@ def error(err):
 while True:
 
     end_state = None
+    avrprog.init(spi, rst)
 
     # False is pressed
     if switch.value != False:
@@ -104,6 +108,7 @@ while True:
         grnLight.value = False
         yelLight.value = False
         redLight.value = True
+        time.sleep(1)
         end_state = False
 
     else:
@@ -113,6 +118,10 @@ while True:
         yelLight.value = False
         redLight.value = False
         end_state = True
+        
+        
+        avrprog._spi.deinit()
+        
     
     # wait for the switch to be opened
     while switch.value == False:
@@ -126,3 +135,4 @@ while True:
     grnLight.value = True
     yelLight.value = False
     redLight.value = False
+    spi = busio.SPI(sck, mosi, miso)
